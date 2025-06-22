@@ -146,6 +146,35 @@ systemctl restart dovecot
 systemctl restart postfix
 
 # Final Check
-ls -l /var/spool/postfix/private/auth
+#!/bin/bash
+
+echo "🔧 Fixing Dovecot: Adding missing passdb and userdb..."
+
+# Backup the existing config
+cp /etc/dovecot/conf.d/10-auth.conf /etc/dovecot/conf.d/10-auth.conf.bak
+
+# Apply the proper configuration
+cat <<EOF > /etc/dovecot/conf.d/10-auth.conf
+disable_plaintext_auth = no
+auth_mechanisms = plain login
+
+passdb {
+  driver = pam
+}
+
+userdb {
+  driver = passwd
+}
+EOF
+
+echo "✅ Configuration updated."
+
+# Restart dovecot
+echo "🔄 Restarting Dovecot..."
+systemctl restart dovecot
+
+# Check if socket was created
+echo "📂 Checking for Postfix auth socket:"
+ls -l /var/spool/postfix/private/auth || echo "❌ Socket not found. Check Dovecot logs."
 
 echo -e "\n✅✅✅ TASK COMPLETED — Postfix + Dovecot + DKIM + TLS mail server is now installed! ✅✅✅"
