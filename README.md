@@ -138,13 +138,8 @@ service auth {
 sudo systemctl restart postfix
 sudo systemctl restart dovecot
 
-ufw allow 587
 ufw allow 22
-ufw allow 25
-ufw allow 993
-ufw allow 995
-ufw allow 80
-ufw allow 443
+sudo ufw allow 25,80,443,587,993/tcp
 
 sudo systemctl restart dovecot
 ls -l /var/spool/postfix/private/auth
@@ -178,3 +173,7 @@ ssl_protocols = !SSLv3 !TLSv1 !TLSv1.1 TLSv1.2 TLSv1.3
 
 sudo systemctl restart dovecot
 sudo systemctl restart postfix
+
+nano /etc/dovecot/conf.d/10-mail.conf
+mail_location = maildir:~/Maildir
+sudo systemctl restart dovecot
