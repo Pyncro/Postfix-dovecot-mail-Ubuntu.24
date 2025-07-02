@@ -97,5 +97,6 @@ fi
 
 echo "⚠️⚠️⚠️⚠️⚠️WARNING , PLEASE MODIFY 10-AUT.CONF WITH BRACKETS , REFER TO AI OR MY GITHUB FOR MORE INFORMATION⚠️⚠️⚠️⚠️⚠️"
 
+echo "first part completed , before heading over to the second part please ensure that you've configured most of your VPS linking"
 
 
