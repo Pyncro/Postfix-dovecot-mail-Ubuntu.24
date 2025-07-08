@@ -95,6 +95,23 @@ if ! grep -q '^auth_username_format = %n' "$AUTH_CONF"; then
     echo 'auth_username_format = %n' | sudo tee -a "$AUTH_CONF" > /dev/null
 fi
 
+#!/bin/bash
+
+# Update package list
+sudo apt update
+
+# Install Certbot
+sudo apt install -y certbot
+
+# Request certificate for mail.example.com using standalone mode
+sudo certbot certonly --standalone \
+  --non-interactive \
+  --agree-tos \
+  --email info@example.com \
+  -d mail.example.com
+
+
+
 echo "⚠️⚠️⚠️⚠️⚠️WARNING , PLEASE MODIFY 10-AUT.CONF WITH BRACKETS , REFER TO AI OR MY GITHUB FOR MORE INFORMATION⚠️⚠️⚠️⚠️⚠️"
 
 echo "first part completed , before heading over to the second part please ensure that you've configured most of your VPS linking"
