@@ -1,13 +1,3 @@
-Postfix uses Dovecot as a SASL authentication backend. Ensure these lines exist in your /etc/postfix/main.cf:
-
-# Enable SMTP authentication
-smtpd_sasl_type = dovecot
-smtpd_sasl_path = private/auth
-smtpd_sasl_auth_enable = yes
-
-
-
-
 /etc/postfix/master.cf
 
 submission inet n       -       y       -       -       smtpd
