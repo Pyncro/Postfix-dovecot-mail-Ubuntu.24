@@ -34,6 +34,9 @@ echo "$MAILNAME" | sudo tee /etc/mailname > /dev/null
 sudo postconf -e "myhostname = $MAILNAME"
 sudo postconf -e "mydestination = \$myhostname, localhost.\$mydomain, localhost"
 sudo postconf -e "home_mailbox = Maildir/"
+sudo postconf -e "smtpd_sasl_type = dovecot"
+sudo postconf -e "smtpd_sasl_path = private/auth"
+sudo postconf -e "smtpd_sasl_auth_enable = yes"
 
 # Mailutils install
 apt install -y postfix mailutils
