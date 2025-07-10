@@ -1,10 +1,5 @@
 sudo nano /etc/opendkim.conf
 
-
-#Add lines
-AutoRestart Yes
-AutoRestartRate 10/1h
-
 #Change
 LogWhy Yes
 Mode sv
@@ -17,9 +12,3 @@ Umask 002
 Socket inet:8891@localhost
 
 
-#Add lines at the end
-ExternalIgnoreList refile:/etc/opendkim/TrustedHosts
-InternalHosts refile:/etc/opendkim/TrustedHosts
-KeyTable refile:/etc/opendkim/KeyTable
-SigningTable refile:/etc/opendkim/SigningTable
-SignatureAlgorithm rsa-sha256
