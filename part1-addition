@@ -23,6 +23,11 @@ submission inet n       -       y       -       -       smtpd
 
 
 
+/etc/dovecot/conf.d/10-ssl.conf
+
+ssl = required
+ssl_cert = </etc/letsencrypt/live/mail.example.com/fullchain.pem
+ssl_key = </etc/letsencrypt/live/mail.example.com/privkey.pem
 
 
 
