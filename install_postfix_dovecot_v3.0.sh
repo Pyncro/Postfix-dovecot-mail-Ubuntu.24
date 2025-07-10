@@ -55,5 +55,51 @@ echo -e "${GREEN}Restarting OpenDKIM and Postfix...${NC}"
 sudo systemctl restart opendkim
 sudo systemctl restart postfix
 
+echo "✅ All done!"
+echo -e "${RED}⚠️ Reminder: Review and modify OpenDKIM's main config files if needed (e.g., /etc/opendkim.conf). Follow part2-addition for slight changes.${NC}"
+
+CONFIG_FILE="/etc/opendkim.conf"
+TMP_FILE="/tmp/opendkim.conf.modified"
+
+# Check if the config file exists
+if [ ! -f "$CONFIG_FILE" ]; then
+  echo "❌ Error: $CONFIG_FILE not found."
+  exit 1
+fi
+
+echo "📦 Backing up original config file to ${CONFIG_FILE}.bak"
+sudo cp "$CONFIG_FILE" "${CONFIG_FILE}.bak"
+
+echo "🛠 Modifying $CONFIG_FILE..."
+
+# Build the modified config
+{
+  # Top section
+  echo "#Add lines"
+  echo "AutoRestart Yes"
+  echo "AutoRestartRate 10/1h"
+  echo ""
+
+  # Original content
+  cat "$CONFIG_FILE"
+
+  # Bottom section
+  echo ""
+  echo "#Add lines at the end"
+  echo "ExternalIgnoreList refile:/etc/opendkim/TrustedHosts"
+  echo "InternalHosts refile:/etc/opendkim/TrustedHosts"
+  echo "KeyTable refile:/etc/opendkim/KeyTable"
+  echo "SigningTable refile:/etc/opendkim/SigningTable"
+  echo "SignatureAlgorithm rsa-sha256"
+} > "$TMP_FILE"
+
+# Overwrite the original file
+sudo mv "$TMP_FILE" "$CONFIG_FILE"
+
+echo "✅ $CONFIG_FILE updated successfully."
+
+# Prompt user to review/edit in nano
+read -p "🔍 Press Enter to open the file in nano for review/editing..."
+sudo nano "$CONFIG_FILE"
+
 echo -e "${GREEN}TASK COMPLETE ✅${NC}"
-echo -e "${RED}⚠️ Reminder: Review and modify OpenDKIM's main config files if needed (e.g., /etc/opendkim.conf). Follow part2-modifications.${NC}"
