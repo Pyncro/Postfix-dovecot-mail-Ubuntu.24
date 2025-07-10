@@ -1,36 +1,45 @@
 #!/bin/bash
 
+# Color setup
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
 set -e
 
-echo "✅ Starting Mail Server Installation..."
+echo -e "${GREEN}✅ Starting Mail Server Installation...${NC}"
 
 # Step 1: Update system
-echo "✅ Updating system..."
+echo -e "${YELLOW}Updating system packages...${NC}"
 apt-get update && apt-get upgrade -y
+echo -e "${GREEN}✔️ System updated successfully.${NC}"
 
 # Step 2: Set hostname
-echo "✅ Setting hostname..."
+echo -e "${YELLOW}Setting hostname to mail.example.com...${NC}"
 hostnamectl set-hostname mail.example.com
+echo -e "${GREEN}✔️ Hostname set.${NC}"
 
 # Step 3: Installing Postfix
-#!/bin/bash
-
-set -e
-
 MAILNAME="example.com"
+echo -e "${YELLOW}Installing Postfix...${NC}"
 
-# Preconfigure Postfix with minimal changes
+# Preconfigure Postfix
+echo -e "${YELLOW}Pre-configuring Postfix...${NC}"
 echo "postfix postfix/mailname string $MAILNAME" | sudo debconf-set-selections
 echo "postfix postfix/main_mailer_type select Internet Site" | sudo debconf-set-selections
 
-# Install postfix without interactive prompts
+# Install Postfix
+echo -e "${YELLOW}Installing Postfix package...${NC}"
 sudo DEBIAN_FRONTEND=noninteractive apt-get update
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y postfix
+echo -e "${GREEN}✔️ Postfix installed.${NC}"
 
-# Ensure mailname is set correctly
+# Set mailname
 echo "$MAILNAME" | sudo tee /etc/mailname > /dev/null
 
-# Safely update only the desired settings in main.cf
+# Configure main.cf settings
+echo -e "${YELLOW}Configuring Postfix settings...${NC}"
 sudo postconf -e "myhostname = $MAILNAME"
 sudo postconf -e "mydestination = \$myhostname, localhost.\$mydomain, localhost"
 sudo postconf -e "home_mailbox = Maildir/"
@@ -38,85 +47,75 @@ sudo postconf -e "smtpd_sasl_type = dovecot"
 sudo postconf -e "smtpd_sasl_path = private/auth"
 sudo postconf -e "smtpd_sasl_auth_enable = yes"
 
-# Mailutils install
+# Install mailutils
+echo -e "${YELLOW}Installing mailutils...${NC}"
 apt install -y postfix mailutils
 
-# Optional: restart Postfix to apply changes
+# Restart Postfix
+echo -e "${YELLOW}Restarting Postfix...${NC}"
 sudo systemctl enable postfix
 sudo systemctl restart postfix
-
-# Show status
+echo -e "${GREEN}✔️ Postfix is active and running.${NC}"
 sudo systemctl status postfix --no-pager
 
-
-# DOVECOT TIME
-echo "✅ Installing Dovecot..."
-
-set -e
-
+# Step 4: Installing Dovecot
+echo -e "${YELLOW}Installing Dovecot...${NC}"
 sudo apt update
 sudo apt install -y dovecot-imapd dovecot-pop3d dovecot-lmtpd
+echo -e "${GREEN}✔️ Dovecot installed.${NC}"
 
-echo "✅ DOVECOT.CONF INITIATION"
-# Path to dovecot.conf
+# Configure dovecot.conf
+echo -e "${YELLOW}Configuring dovecot.conf...${NC}"
 DOVECOT_CONF="/etc/dovecot/dovecot.conf"
-
-# Backup file with timestamp
 BACKUP_FILE="${DOVECOT_CONF}.bak.$(date +%F_%T)"
-
-# Line to add
 LINE_TO_ADD="protocols = pop3 pop3s imap imaps"
 
-# Check if dovecot.conf exists
 if [[ ! -f "$DOVECOT_CONF" ]]; then
-  echo "Error: $DOVECOT_CONF not found."
+  echo -e "${RED}❌ Error: $DOVECOT_CONF not found.${NC}"
   exit 1
 fi
 
-# Make a backup
 cp "$DOVECOT_CONF" "$BACKUP_FILE"
-echo "Backup created at $BACKUP_FILE"
+echo -e "${GREEN}✔️ Backup created at $BACKUP_FILE${NC}"
 
-# Check if the line already exists (exact match)
 if grep -Fxq "$LINE_TO_ADD" "$DOVECOT_CONF"; then
-  echo "Line already present in $DOVECOT_CONF, no changes made."
+  echo -e "${YELLOW}Line already present in dovecot.conf, skipping...${NC}"
 else
   echo "$LINE_TO_ADD" >> "$DOVECOT_CONF"
-  echo "Line added to $DOVECOT_CONF"
+  echo -e "${GREEN}✔️ Line added to dovecot.conf${NC}"
 fi
-echo "✅ DOVECOT.CONF DONE"
-# --------- 1. Modify 10-auth.conf ---------
+
+# Modify 10-auth.conf
+echo -e "${YELLOW}Modifying 10-auth.conf...${NC}"
 AUTH_CONF="/etc/dovecot/conf.d/10-auth.conf"
 
-# Append ' login' to the existing auth_mechanisms line if not already there
 if grep -q '^auth_mechanisms = plain$' "$AUTH_CONF"; then
-    sudo sed -i 's/^auth_mechanisms = plain$/auth_mechanisms = plain login/' "$AUTH_CONF"
+  sudo sed -i 's/^auth_mechanisms = plain$/auth_mechanisms = plain login/' "$AUTH_CONF"
+  echo -e "${GREEN}✔️ auth_mechanisms updated with 'login'.${NC}"
 fi
 
-# Add 'auth_username_format = %n' only if it's not already set
 if ! grep -q '^auth_username_format = %n' "$AUTH_CONF"; then
-    echo 'auth_username_format = %n' | sudo tee -a "$AUTH_CONF" > /dev/null
+  echo 'auth_username_format = %n' | sudo tee -a "$AUTH_CONF" > /dev/null
+  echo -e "${GREEN}✔️ Added auth_username_format to 10-auth.conf.${NC}"
 fi
 
-#!/bin/bash
-
-# Update package list
+# Step 5: SSL Certificate with Certbot
+echo -e "${YELLOW}Installing Certbot and requesting SSL certificate...${NC}"
 sudo apt update
-
-# Install Certbot
 sudo apt install -y certbot
 
-# Request certificate for mail.example.com using standalone mode
 sudo certbot certonly --standalone \
   --non-interactive \
   --agree-tos \
   --email info@example.com \
   -d mail.example.com
+echo -e "${GREEN}✔️ SSL certificate obtained using Certbot.${NC}"
 
+# Final warning
+echo -e "${RED}⚠️ WARNING: Please manually review 10-auth.conf and add brackets if needed."
+echo -e "Refer to AI or your GitHub documentation for correct formatting.${NC}"
 
-
-echo "⚠️⚠️⚠️⚠️⚠️WARNING , PLEASE MODIFY 10-AUT.CONF WITH BRACKETS , REFER TO AI OR MY GITHUB FOR MORE INFORMATION⚠️⚠️⚠️⚠️⚠️"
-
-echo "first part completed , before heading over to the second part please ensure that you've configured most of your VPS linking"
+echo -e "${GREEN}✅ First part of setup completed successfully.${NC}"
+echo -e "${YELLOW}⚠️ Before continuing, make sure your VPS DNS and mail domain are properly configured.${NC}"
 
 
