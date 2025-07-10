@@ -1,15 +1,25 @@
-/etc/postfix/master.cf
-
-submission inet n       -       y       -       -       smtpd
-  -o syslog_name=postfix/submission
-  -o smtpd_tls_security_level=encrypt
-  -o smtpd_sasl_auth_enable=yes
-  -o smtpd_client_restrictions=permit_sasl_authenticated,reject
+sudo nano /etc/opendkim.conf
 
 
+#Add lines
+AutoRestart Yes
+AutoRestartRate 10/1h
+
+#Change
+LogWhy Yes
+Mode sv
 
 
 
+#Change
+#Socket                  local:/run/opendkim/opendkim.sock
+Umask 002
+Socket inet:8891@localhost
 
 
-sudo systemctl restart postfix dovecot
+#Add lines at the end
+ExternalIgnoreList refile:/etc/opendkim/TrustedHosts
+InternalHosts refile:/etc/opendkim/TrustedHosts
+KeyTable refile:/etc/opendkim/KeyTable
+SigningTable refile:/etc/opendkim/SigningTable
+SignatureAlgorithm rsa-sha256
