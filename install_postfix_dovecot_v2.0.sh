@@ -94,9 +94,9 @@ if grep -q '^auth_mechanisms = plain$' "$AUTH_CONF"; then
   echo -e "${GREEN}✔️ auth_mechanisms updated with 'login'.${NC}"
 fi
 
-if ! grep -q '^auth_username_format = %n' "$AUTH_CONF"; then
-  echo 'auth_username_format = %n' | sudo tee -a "$AUTH_CONF" > /dev/null
-  echo -e "${GREEN}✔️ Added auth_username_format to 10-auth.conf.${NC}"
+if ! grep -q '^mail_location = maildir:~/Maildir' "$AUTH_CONF"; then
+  echo 'mail_location = maildir:~/Maildir' | sudo tee -a "$AUTH_CONF" > /dev/null
+  echo -e "${GREEN}✔️ Added mail_location to 10-auth.conf.${NC}"
 fi
 
 # Step 5: SSL Certificate with Certbot
