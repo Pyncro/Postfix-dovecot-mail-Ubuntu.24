@@ -94,9 +94,14 @@ if grep -q '^auth_mechanisms = plain$' "$AUTH_CONF"; then
   echo -e "${GREEN}✔️ auth_mechanisms updated with 'login'.${NC}"
 fi
 
+
+# Modify 10-mail.conf
+echo -e "${YELLOW}Modifying 10-mail.conf...${NC}"
+AUTH_CONF="/etc/dovecot/conf.d/10-mail.conf"
+
 if ! grep -q '^mail_location = maildir:~/Maildir' "$AUTH_CONF"; then
   echo 'mail_location = maildir:~/Maildir' | sudo tee -a "$AUTH_CONF" > /dev/null
-  echo -e "${GREEN}✔️ Added mail_location to 10-auth.conf.${NC}"
+  echo -e "${GREEN}✔️ Added mail_location to 10-mail.conf.${NC}"
 fi
 
 # Step 5: SSL Certificate with Certbot
