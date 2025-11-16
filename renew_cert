@@ -2,3 +2,8 @@
 
 
 For mail: sudo certbot --nginx -d mail.example.com
+
+
+
+
+sudo systemctl restart dovecot postfix
